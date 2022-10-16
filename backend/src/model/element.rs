@@ -20,6 +20,8 @@ pub struct ListElement {
     pub notes: Option<String>,
     pub tags: Option<String>,
     pub status: String,
+    pub ctime: String, 
+    pub mtime: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Insertable, AsChangeset)]
@@ -216,6 +218,8 @@ fn parse_get_result(row: LETuple) -> ListElement {
         title: row.1,
         notes: row.2,
         tags: row.3,
+        ctime: row.4,
+        mtime: row.5,
         status: row.6,
     }
 }

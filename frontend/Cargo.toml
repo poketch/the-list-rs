@@ -8,4 +8,6 @@ authors = ["Jon-Mycal Palmer"]
 [dependencies]
 backend = { path = "../backend"}
 
-druid = "0.7.0"
+eframe = "0.19.0"
+chrono = "0.4.22"
+itertools = "0.10.5"

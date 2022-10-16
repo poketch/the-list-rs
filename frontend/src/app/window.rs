@@ -1,22 +1,47 @@
-use druid::widget::{Button, Flex, Label};
-use druid::{LocalizedString, Widget, WidgetExt,AppLauncher, WindowDesc, PlatformError};
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-pub fn run() -> Result<(), PlatformError> {
-    let main_window = WindowDesc::new(ui_builder);
-    let data = 0_u32;
-    AppLauncher::with_window(main_window)
-        .use_simple_logger()
-        .launch(data)
+use eframe::{NativeOptions, Frame};
+use eframe::egui::{self, Context, CentralPanel};
+
+pub fn run() {
+    eframe::run_native(
+        "The List",
+        NativeOptions::default(),
+        Box::new(|_cc| Box::new(MyApp::default())),
+    );
 }
 
-pub fn ui_builder() -> impl Widget<u32> {
-    // The label text will be computed dynamically based on the current locale and count
-    let text =
-        LocalizedString::new("hello-counter").with_arg("count", |data: &u32, _env| (*data).into());
-    let label = Label::new(text).padding(5.0).center();
-    let button = Button::new("increment")
-        .on_click(|_ctx, data, _env| *data += 1)
-        .padding(5.0);
+struct MyApp {
+    name: String,
+    age: u32,
+}
 
-    Flex::column().with_child(label).with_child(button)
+impl Default for MyApp {
+    fn default() -> Self {
+        Self {
+            name: "Arthur".to_owned(),
+            age: 42,
+        }
+    }
+}
+
+impl eframe::App for MyApp {
+    
+    fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
+        
+        CentralPanel::default().show(ctx, |ui| {
+            ui.heading("My egui Application");
+            ui.horizontal(|ui| {
+                ui.label("Your name: ");
+                ui.text_edit_singleline(&mut self.name);
+            });
+            ui.add(egui::Slider::new(&mut self.age, 0..=120).text("age"));
+            if ui.button("Click each year").clicked() {
+                self.age += 1;
+            }
+            ui.label(format!("Hello '{}', age {}", self.name, self.age));
+        });
+        
+    }
+
 }

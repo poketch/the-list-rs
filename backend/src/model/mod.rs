@@ -2,7 +2,7 @@ mod db;
 mod element; 
 
 //re-export
-pub use element::{ ListElementMAC};
+pub use element::{ ListElementMAC, ListElementStatus, ListElement};
 pub use db::init_db;
 
 #[derive(thiserror::Error, Debug)]
