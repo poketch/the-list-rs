@@ -1,8 +1,12 @@
 
 use backend::{self, model::ListElement};
+use eframe::{epaint::Color32, egui::{Label, RichText, Layout, Separator}, emath::Align};
 use std::{fmt::Display};
 use chrono::{ NaiveDateTime, format::{DelayedFormat, StrftimeItems} };
 use itertools::{Itertools};
+
+pub const PADDING : f32 = 5.0;
+const WHITE: Color32 = Color32::from_rgb(255, 255, 255);
 
 #[derive(Debug)]
 struct ListElementData<'a> { 
@@ -49,7 +53,7 @@ impl Display for ListElementData <'_>{
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct List <'a>{
     list: Vec<ListElementData <'a>>
 }
@@ -60,13 +64,59 @@ impl List <'_>{
         
         Ok(Self { 
             list:
-                backend::model::ListElementMAC::get_all_from_path("backend/sql/db.tldb", None)?
+                backend::model::ListElementMAC::get_all_from_path(super::DEFAULT_PATH, None)?
                 .iter().map( move |element|
                     ListElementData::new(element.to_owned())
                 )
                 .collect()
         })
     }
+
+    pub fn render_list_elements(&self, ui: &mut eframe::egui::Ui) -> () {
+
+        for ele in &self.list {
+            ui.add_space(PADDING);
+            
+            //render LE Title
+            ui.colored_label(WHITE, &ele.title);
+
+            //render status
+            ui.add_space(PADDING);
+            let status = Label::new(RichText::new(&ele.status).text_style(eframe::egui::TextStyle::Button));
+            ui.add(status);
+            
+            //render dates
+            let ctime = Label::new(RichText::new(format!("Created At: {}", &ele.ctime)).text_style(eframe::egui::TextStyle::Button));
+            let mtime = Label::new(RichText::new(format!("Created At: {}", &ele.mtime)).text_style(eframe::egui::TextStyle::Button));
+
+            ui.add_space(PADDING);
+            ui.with_layout(Layout::right_to_left(Align::TOP), |ui| {
+                ui.add(ctime);
+                ui.add_space(PADDING);
+                ui.add(mtime);
+            });
+            
+            //render tags
+            
+            ui.add_space(PADDING);
+            
+            ui.with_layout(Layout::left_to_right(Align::LEFT), |ui|{
+
+                for tag in &ele.tags {
+                    let wtag = Label::new(RichText::new(tag).text_style(eframe::egui::TextStyle::Button));
+                    ui.add(wtag);
+                }
+            });
+            
+            //separator
+            ui.add_space(PADDING);
+            ui.add(Separator::default());
+        }
+    }
+
+
+
+
 }
 
 impl Display for List <'_>{

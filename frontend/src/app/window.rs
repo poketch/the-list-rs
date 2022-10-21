@@ -1,47 +1,51 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-use eframe::{NativeOptions, Frame};
-use eframe::egui::{self, Context, CentralPanel};
+use super::list::List;
+use eframe::{NativeOptions, Frame, run_native};
+use eframe::App;
+use eframe::egui::{ CentralPanel, ScrollArea };
+use crate::app::WINDOW_SIZE;
 
 pub fn run() {
-    eframe::run_native(
-        "The List",
-        NativeOptions::default(),
-        Box::new(|_cc| Box::new(MyApp::default())),
-    );
+
+    let mut win_option = NativeOptions::default();
+    win_option.initial_window_size = Some(WINDOW_SIZE);
+    
+    run_native("The List", win_option, Box::new( |cc| Box::new(ListApp::new(cc))))    
 }
 
-struct MyApp {
-    name: String,
-    age: u32,
+#[derive(Default)]
+struct ListApp <'a>
+{
+ list: List <'a>,   
 }
 
-impl Default for MyApp {
-    fn default() -> Self {
+impl ListApp <'_>{
+
+    fn new (cc: &eframe::CreationContext<'_>) -> Self {
+        
+        //configure do inital setup here like font families and stuff like that
         Self {
-            name: "Arthur".to_owned(),
-            age: 42,
+            list: List::new().unwrap()
         }
     }
 }
 
-impl eframe::App for MyApp {
-    
-    fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
-        
-        CentralPanel::default().show(ctx, |ui| {
-            ui.heading("My egui Application");
-            ui.horizontal(|ui| {
-                ui.label("Your name: ");
-                ui.text_edit_singleline(&mut self.name);
-            });
-            ui.add(egui::Slider::new(&mut self.age, 0..=120).text("age"));
-            if ui.button("Click each year").clicked() {
-                self.age += 1;
-            }
-            ui.label(format!("Hello '{}', age {}", self.name, self.age));
+impl App for ListApp <'_>{
+
+    fn update(&mut self, 
+        ctx: &eframe::egui::Context, 
+        _frame: &mut eframe::Frame
+    )
+    { 
+        CentralPanel::default().show( ctx, |ui|{
+            ScrollArea::vertical().auto_shrink([true;2]).show(ui, |ui|{
+                self.list.render_list_elements(ui);
+            })
         });
-        
     }
 
 }
+
+
+
